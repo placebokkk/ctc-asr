@@ -93,21 +93,20 @@ if [ $stage -le 3 ]; then
     --cv_data_dir data/train_cv05 \
     --model_dir $dir/model || exit 1;
 fi
-  
+
 if [ $stage -le 4 ]; then
   # Send training/cv data ctc model and count greedy decoding result
   # Here we use a pre-count stats
   cp conf/label.counts $dir/priors.txt
-
   echo =====================================================================
   echo "                            Decoding                               "
   echo =====================================================================
-  for set in test_dev93 test_eval92; do
-    utils/sort_feature_by_len.sh data/$set/feats.scp data/$set/feats.sort.scp 1
-  done
   # Config for the basic decoding: --beam 30.0 --max-active 5000 --acoustic-scales "0.7 0.8 0.9"
   for lm_suffix in tgpr; do
     steps/decode_ctc_lat_pytorch.sh --cmd "$decode_cmd" --nj 10 --beam 17.0 --lattice_beam 8.0 --max-active 5000 --acwt 0.9 \
       data/lang_phn_test_${lm_suffix} $dir/model/final.pt data/test_dev93  $dir/test_dev93_${lm_suffix} || exit 1;
+    
+    steps/decode_ctc_lat_pytorch.sh --cmd "$decode_cmd" --nj 8 --beam 17.0 --lattice_beam 8.0 --max-active 5000 --acwt 0.9 \
+      data/lang_phn_test_${lm_suffix} $dir/model/final.pt data/test_eval92  $dir/test_eval92_${lm_suffix} || exit 1;
   done
 fi

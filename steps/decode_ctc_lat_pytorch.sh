@@ -51,18 +51,24 @@ for f in $graphdir/TLG.fst; do
   [ ! -f $f ] && echo "$0: no such file $f" && exit 1;
 done
 
-python3 pytorch/net-output-extract.py \
+$cmd JOB=1:$nj $dir/log/sort_feature.JOB.log \
+utils/sort_feature_by_len.sh $data/split$nj/JOB/feats.scp $data/split$nj/JOB/feats.sort.scp 1
+
+# Do this in order
+for JOB in `seq $nj`;do 
+   python3 pytorch/net-output-extract.py \
   --model_conf conf/model.json \
   --prior_file $srcdir/priors.txt \
   --model_file $model \
-  --data_dir $data \
-  --out_file $srcdir/out_prob.txt
+  --data_dir $data/split$nj/$JOB/ \
+  --out_file $srcdir/out_prob.$JOB.txt
+done
 
 # Decode for each of the acoustic scales
 $cmd JOB=1:$nj $dir/log/decode.JOB.log \
   latgen-faster  --max-active=$max_active --max-mem=$max_mem --beam=$beam --lattice-beam=$lattice_beam \
   --acoustic-scale=$acwt --allow-partial=true --word-symbol-table=$graphdir/words.txt \
-  $graphdir/TLG.fst ark,t:$srcdir/out_prob.txt "ark:|gzip -c > $dir/lat.JOB.gz" || \
+  $graphdir/TLG.fst ark,t:$srcdir/out_prob.JOB.txt "ark:|gzip -c > $dir/lat.JOB.gz" || \
 exit 1;
 
 # Scoring
