@@ -1,0 +1,6 @@
+{
+        "input_dim":120,
+        "hidden_dim":640,
+        "num_layers":4,
+        "output_dim":74
+}
