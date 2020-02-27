@@ -51,9 +51,12 @@ for f in $graphdir/TLG.fst; do
   [ ! -f $f ] && echo "$0: no such file $f" && exit 1;
 done
 
+echo 'run sort feature'
+echo $dir
 $cmd JOB=1:$nj $dir/log/sort_feature.JOB.log \
-utils/sort_feature_by_len.sh $data/split$nj/JOB/feats.scp $data/split$nj/JOB/feats.sort.scp 1
+utils/sort_feature_by_len.sh $data/split$nj/JOB/feats.scp $data/split$nj/JOB/feats.sort.scp JOB 1
 
+echo 'run net-out-extract'
 # Do this in order
 for JOB in `seq $nj`;do 
    python3 pytorch/net-output-extract.py \

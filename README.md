@@ -1,4 +1,4 @@
-# ASR E2E acoustic model training with CTC in pythorch 
+# ASR E2E acoustic model training with CTC in pytorch 
 
 I am a newbie in pytorch. I create this repo to learn pythorch and 
 E2E asr modeling.

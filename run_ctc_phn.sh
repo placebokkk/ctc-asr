@@ -35,7 +35,7 @@ if [ $stage -le 1 ]; then
   # Compile the language-model FST and the final decoding graph TLG.fst
   local/wsj_decode_graph.sh data/lang_phn || exit 1;
 fi
-exit 1
+
 if [ $stage -le 2 ]; then
   echo =====================================================================
   echo "                    FBank Feature Generation                       "
@@ -58,9 +58,9 @@ if [ $stage -le 2 ]; then
   done
 fi
 
-if [ $stage -le 2 ]; then
+if [ $stage -le 3 ]; then
   echo =====================================================================
-  echo "                        Prepare Training data                      "
+  echo "                Prepare Network Training data                      "
   echo =====================================================================
   # Label sequences; simply convert words into their label indices
   #for set in train_tr95 train_cv05; do
@@ -69,10 +69,11 @@ if [ $stage -le 2 ]; then
     utils/sort_feature_by_len.sh data/$set/feats.scp data/$set/feats.sort.scp 10
   done
 fi
+
 lstm_layer_num=4     # number of LSTM layers
 lstm_cell_dim=640    # number of memory cells in every LSTM layer
 dir=exp/train_phn_l${lstm_layer_num}_c${lstm_cell_dim}_pytorch  
-if [ $stage -le 3 ]; then
+if [ $stage -le 4 ]; then
   echo =====================================================================
   echo "                Pytorch Network Training                           "
   echo =====================================================================
@@ -94,7 +95,7 @@ if [ $stage -le 3 ]; then
     --model_dir $dir/model || exit 1;
 fi
 
-if [ $stage -le 4 ]; then
+if [ $stage -le 5 ]; then
   # Send training/cv data ctc model and count greedy decoding result
   # Here we use a pre-count stats
   cp conf/label.counts $dir/priors.txt
